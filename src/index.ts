@@ -15,9 +15,14 @@ app.use("/api/emp/employees", employeeRouter);
 // Parse conf
 dotenv.config();
 const PORT = process.env.PORT || 8000;
+const DB_URI = process.env.DB_URI;
+
+if (DB_URI === undefined) {
+    throw new Error("No database URL supplied to DB_URI");
+}
 
 // Connect the db
-connect("mongodb://127.0.0.1:27017/comp3123_assigment1")
+connect(DB_URI)
     .then(() => {
         // Finally, begin listening once the db has been connected
         app.listen(PORT, () => {
