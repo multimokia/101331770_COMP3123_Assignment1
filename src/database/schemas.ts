@@ -1,5 +1,18 @@
 import { model, Schema } from "mongoose";
 
+const EMAIL_PROP = {
+    type: String,
+    required: true,
+    maxLength: 50,
+    unique: true,
+    validate: {
+        validator: function(x: string) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(x);
+        },
+        message: "{VALUE} is not a valid email."
+    }
+};
+
 interface IUser {
     username: string,
     email: string,
@@ -8,8 +21,8 @@ interface IUser {
 
 const userSchema = new Schema<IUser>({
     username: {type: String, required: true, maxLength: 100},
-    email: {type: String, required: true, maxLength: 50, unique: true},
-    password: {type: String, required: true, maxLength: 50},
+    email: EMAIL_PROP,
+    password: {type: String, required: true},
 });
 
 interface IEmployee {
@@ -23,7 +36,7 @@ interface IEmployee {
 const employeeSchema = new Schema<IEmployee>({
     first_name: {type: String, required: true, maxLength: 100},
     last_name: {type: String, required: true, maxLength: 50},
-    email: {type: String, maxLength: 50, unique: true},
+    email: EMAIL_PROP,
     gender: {type: String, maxLength: 25},
     salary: {type: Number, required: true}
 });

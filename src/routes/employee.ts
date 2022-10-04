@@ -1,6 +1,7 @@
 import { json } from "express";
 import { Router } from "express";
 import { Employee } from "../database/schemas.js";
+import { validateMissingProperties } from "../helpers/propertyvalidators.js";
 
 const router = Router();
 
@@ -13,23 +14,13 @@ router.route("/")
             .catch(err => res.status(500).send({status: false, message: err}));
     })
     .post(json(), (req, res) => {
-        if (req.body.first_name === undefined) {
-            res.status(400).send({status: false, message: "First name missing."});
-            return;
-        }
+        const propValidationResult = validateMissingProperties(
+            req.body,
+            ["first_name", "last_name", "email", "salary"]
+        );
 
-        else if (req.body.last_name === undefined) {
-            res.status(400).send({status: false, message: "Last name missing."});
-            return;
-        }
-
-        else if (req.body.email === undefined) {
-            res.status(400).send({status: false, message: "Email missing."});
-            return;
-        }
-
-        else if (req.body.salary === undefined) {
-            res.status(400).send({status: false, message: "Salary missing."});
+        if (!propValidationResult.status) {
+            res.status(400).send(propValidationResult);
             return;
         }
 

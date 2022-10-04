@@ -24,6 +24,9 @@ const DB_URI = process.env.DB_URI;
 const KEY_FILE = process.env.SSL_KEY_FP;
 const CERT_FILE = process.env.SSL_CERT_FP;
 
+// Get the API secret
+export const API_SECRET = process.env.API_SECRET;
+
 let is_https = true;
 let key: Buffer | undefined, cert: Buffer | undefined = undefined;
 
@@ -31,7 +34,11 @@ if (DB_URI === undefined) {
     throw new Error("No database URL supplied to DB_URI");
 }
 
+else if (API_SECRET === undefined) {
+    throw new Error("Missing API_SECRET");
+}
 
+// Now handle optional props
 if (KEY_FILE === undefined || CERT_FILE === undefined) {
     console.log("No SSL keys/certs found, using http.");
     is_https = false;
@@ -49,7 +56,6 @@ else {
         is_https = false;
     }
 }
-
 
 // Connect the db
 connect(DB_URI)
