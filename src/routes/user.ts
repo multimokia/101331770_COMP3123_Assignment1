@@ -5,6 +5,14 @@ import { validateMissingProperties } from "../helpers/propertyvalidators.js";
 import { API_SECRET } from "../index.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import {
+    alreadyExists,
+    badRequest,
+    internalServerError,
+    itemCreated,
+    ok,
+    unauthorized
+} from "../helpers/responses.js";
 
 const router = Router();
 
@@ -16,19 +24,18 @@ router.route("/signup")
         );
 
         if (!propertyValidationResult.status) {
-            res.status(400).send(propertyValidationResult);
+            badRequest(res, propertyValidationResult);
         }
 
         // Now, see if we have an entry with this username already
         User.findOne({username: req.body.username})
             .then(user => {
                 if (user !== null) {
-                    res.status(400).send({status: false, message: "Username taken."});
-                    return;
+                    return alreadyExists(res, {message: "User already exists."});
                 }
 
                 if (req.body.password.length > 50) {
-                    res.status(400).send({status: false, message: "Password must be no longer than 50 characters."});
+                    badRequest(res, {message: "Password must be no longer than 50 characters."});
                     return;
                 }
 
@@ -39,31 +46,28 @@ router.route("/signup")
                     password: bcrypt.hashSync(req.body.password, 8)
                 }).save()
                     .then(() => {
-                        res.status(201).send({status: true, message: "User created successfully"});
+                        itemCreated(res, {message: "User created successfully"});
                     })
-                    .catch(err => res.status(500).send({status: false, message: err}));
+                    .catch(err => internalServerError(res, {message: err}));
             })
-            .catch(err => res.status(500).send({status: false, message: err}));
+            .catch(err => internalServerError(res, {message: err}));
     });
 
 router.route("/login")
     .post(json(), (req, res) => {
         const propertyValidationResult = validateMissingProperties(
             req.body,
-            ["username", "email", "password"]
+            ["username", "password"]
         );
 
         if (!propertyValidationResult.status) {
-            res.status(400).send(propertyValidationResult);
-            return;
+            return badRequest(res, propertyValidationResult);
         }
 
-        // TODO: Encrypt the password and secure this
-        User.findOne({email: req.body.email})
+        User.findOne({username: req.body.username})
             .then(user => {
                 if (user === null) {
-                    res.status(401).send({status: false, message: "Invalid username and/or password."});
-                    return;
+                    return unauthorized(res);
                 }
 
                 // compare pws
@@ -73,8 +77,7 @@ router.route("/login")
                 );
 
                 if (!isPasswordValid) {
-                    res.status(401).send({status: false, message: "Invalid password."});
-                    return;
+                    return unauthorized(res, {message: "Invalid password."});
                 }
 
                 // Otherwise, we should sign a token
@@ -84,8 +87,7 @@ router.route("/login")
                     {expiresIn: 86400}
                 );
 
-                res.status(200).send({
-                    status: true,
+                return ok(res, {
                     username: user.username,
                     message: "User logged in successfully.",
                     jwt_token: token
@@ -93,7 +95,7 @@ router.route("/login")
             })
             .catch(() => {
                 // In the interest of security, we do not allow the requester to know if an account exists with this info
-                res.status(401).send({status: false, message: "Invalid password."});
+                return unauthorized(res, {message: "Invalid password."});
             });
     });
 

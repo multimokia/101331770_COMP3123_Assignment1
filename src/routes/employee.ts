@@ -2,6 +2,7 @@ import { json } from "express";
 import { Router } from "express";
 import { Employee } from "../database/schemas.js";
 import { validateMissingProperties } from "../helpers/propertyvalidators.js";
+import { badRequest, itemCreated, ok, internalServerError, notFound, methodNotAllowed, noContent } from "../helpers/responses.js";
 
 const router = Router();
 
@@ -9,9 +10,9 @@ router.route("/")
     .get((req, res) => {
         Employee.find({})
             .then(results => {
-                res.status(200).send(results);
+                ok(res, {content: results});
             })
-            .catch(err => res.status(500).send({status: false, message: err}));
+            .catch(err => internalServerError(res, {message: err}));
     })
     .post(json(), (req, res) => {
         const propValidationResult = validateMissingProperties(
@@ -20,7 +21,7 @@ router.route("/")
         );
 
         if (!propValidationResult.status) {
-            res.status(400).send(propValidationResult);
+            badRequest(res, propValidationResult);
             return;
         }
 
@@ -28,7 +29,7 @@ router.route("/")
         Employee.findOne({email: req.body.email})
             .then(user => {
                 if (user !== null) {
-                    res.status(400).send({status: false, message: "An employee using this email already exists."});
+                    badRequest(res, {message: "An employee using this email already exists."});
                     return;
                 }
 
@@ -41,11 +42,11 @@ router.route("/")
                     gender: req.body.gender ?? null
                 }).save()
                     .then(() => {
-                        res.status(201).send({status: true, message: "Employee created successfully"});
+                        itemCreated(res, {message: "Employee created successfully"});
                     })
-                    .catch(err => res.status(500).send({status: false, message: err}));
+                    .catch(err => internalServerError(res, {message: err}));
             })
-            .catch(err => res.status(500).send({status: false, message: err}));
+            .catch(err => internalServerError(res, {message: err}));
     });
 
 router.route("/:id")
@@ -53,14 +54,14 @@ router.route("/:id")
         Employee.findOne({_id: req.params.id})
             .then(employee => {
                 if (employee === null) {
-                    res.status(404).send({status: false, message: `Employee with id ${req.params.id} not found.`});
+                    notFound(res, {message: `Employee with id ${req.params.id} not found.`});
                     return;
                 }
 
                 // Otherwise send data
-                res.status(200).send(employee);
+                ok(res, {content: employee});
             })
-            .catch(err => res.status(500).send({status: false, message: err}));
+            .catch(err => internalServerError(res, {message: err}));
     })
     .put(json(), (req, res) => {
         // NOTE: we explicitly pass an object for update as a means of
@@ -78,31 +79,31 @@ router.route("/:id")
             .then(result => {
                 if (result.modifiedCount === 0) {
                     if (result.matchedCount > 0) {
-                        res.status(405).send({status: false, message: "Employee could not be updated."});
+                        methodNotAllowed(res, {message: "Employee could not be updated."});
                     }
                     else {
-                        res.status(404).send({status: false, message: `Employee with id ${req.params.id} not found.`});
+                        notFound(res, {status: false, message: `Employee with id ${req.params.id} not found.`});
                     }
 
                     return;
                 }
 
-                res.status(200).send({status: true, message: `Employee ${req.params.id} updated.`});
+                ok({message: `Employee ${req.params.id} updated.`});
             })
-            .catch(err => res.status(500).send({status: false, message: err}));
+            .catch(err => internalServerError(res, {message: err}));
     })
     .delete((req, res) => {
         Employee.deleteOne({_id: req.params.id})
             .then(result => {
                 if (result.deletedCount === 0) {
-                    res.status(404).send({status: false, message: `Employee with id ${req.params.id} not found.`});
+                    notFound(res, {message: `Employee with id ${req.params.id} not found.`});
                     return;
                 }
 
                 // Id existed, and has been deleted
-                res.status(204).send({status: true, message: `Employee ${req.params.id} has been deleted.`});
+                noContent(res, {message: `Employee ${req.params.id} has been deleted.`});
             })
-            .catch(err => res.status(500).send({status: false, message: err}));
+            .catch(err => internalServerError(res, {message: err}));
     });
 
 export { router };

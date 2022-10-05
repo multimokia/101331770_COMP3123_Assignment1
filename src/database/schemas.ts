@@ -20,7 +20,7 @@ interface IUser {
 }
 
 const userSchema = new Schema<IUser>({
-    username: {type: String, required: true, maxLength: 100},
+    username: {type: String, required: true, maxLength: 100, unique: true},
     email: EMAIL_PROP,
     password: {type: String, required: true},
 });
