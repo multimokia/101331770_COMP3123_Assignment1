@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc --build tsconfig.json && npm run start",
-    "start": "node build/index.js",
+    "start": "node src/index.js",
     "delete": "rmdir dist /s /q"
   },
   "repository": {

@@ -4,3 +4,4 @@ package-lock.json
 *.http
 .env
 *.pem
+*.old

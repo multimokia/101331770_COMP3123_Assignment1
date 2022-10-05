@@ -9,13 +9,13 @@ import { router as userRouter } from "./routes/user.js";
 import { router as employeeRouter } from "./routes/employee.js";
 
 const app = express();
-
 // Add routers
 app.use("/api/user", userRouter);
 app.use("/api/emp/employees", employeeRouter);
 
 // Parse conf
 dotenv.config();
+
 // Get hosting/connection info
 const PORT = process.env.PORT || 8000;
 const DB_URI = process.env.DB_URI;
@@ -28,8 +28,7 @@ const CERT_FILE = process.env.SSL_CERT_FP;
 export const API_SECRET = process.env.API_SECRET;
 
 let is_https = true;
-let key: Buffer | undefined, cert: Buffer | undefined = undefined;
-
+let key, cert = undefined;
 if (DB_URI === undefined) {
     throw new Error("No database URL supplied to DB_URI");
 }
@@ -50,7 +49,6 @@ else {
         key = fs.readFileSync(KEY_FILE);
         cert = fs.readFileSync(CERT_FILE);
     }
-
     catch (err) {
         console.error(`Failed to read key files: ${err}`);
         is_https = false;
@@ -62,13 +60,11 @@ connect(DB_URI)
     .then(() => {
         if (is_https) {
             // Finally, begin listening once the db has been connected
-            const server = https.createServer({key , cert }, app);
-
+            const server = https.createServer({ key, cert }, app);
             server.listen(PORT, () => {
                 console.log(`App listening on port https://localhost:${PORT}/`);
             });
         }
-
         else {
             app.listen(PORT, () => {
                 console.log(`App listening on port http://localhost:${PORT}/`);

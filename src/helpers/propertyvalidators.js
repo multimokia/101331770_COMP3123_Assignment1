@@ -1,11 +1,8 @@
-interface Indexable {
-    [key: string]: object | string | number | []
-}
-
-export function validateMissingProperties(obj: Indexable, required_keys: string[]): {status: boolean, message: string} {
+export function validateMissingProperties(obj, required_keys) {
     const rv = {
         status: true
     };
+
     const missing_keys = [];
 
     for (const required_key of required_keys) {
