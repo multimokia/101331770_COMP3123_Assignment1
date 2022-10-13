@@ -1,18 +1,12 @@
 import { json } from "express";
 import { Router } from "express";
-import { User } from "../database/schemas.js";
+import { IUser } from "../database/schemas.js";
 import { validateMissingProperties } from "../helpers/propertyvalidators.js";
-import { API_SECRET } from "../index.js";
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
 import {
-    alreadyExists,
     badRequest,
-    internalServerError,
-    itemCreated,
-    ok,
-    unauthorized
+    respond
 } from "../helpers/responses.js";
+import { loginUser, registerUser } from "../services/userserviceprovider.js";
 
 const router = Router();
 
@@ -24,33 +18,13 @@ router.route("/signup")
         );
 
         if (!propertyValidationResult.status) {
-            badRequest(res, propertyValidationResult);
+            return respond(res, badRequest(propertyValidationResult));
         }
 
         // Now, see if we have an entry with this username already
-        User.findOne({username: req.body.username})
-            .then(user => {
-                if (user !== null) {
-                    return alreadyExists(res, {message: "User already exists."});
-                }
-
-                if (req.body.password.length > 50) {
-                    badRequest(res, {message: "Password must be no longer than 50 characters."});
-                    return;
-                }
-
-                // No user with that name found. Let's create one
-                new User({
-                    username: req.body.username,
-                    email: req.body.email,
-                    password: bcrypt.hashSync(req.body.password, 8)
-                }).save()
-                    .then(() => {
-                        itemCreated(res, {message: "User created successfully"});
-                    })
-                    .catch(err => internalServerError(res, {message: err}));
-            })
-            .catch(err => internalServerError(res, {message: err}));
+        registerUser(req.body as IUser)
+            .then(payload => respond(res, payload))
+            .catch(payload => respond(res, payload));
     });
 
 router.route("/login")
@@ -61,42 +35,12 @@ router.route("/login")
         );
 
         if (!propertyValidationResult.status) {
-            return badRequest(res, propertyValidationResult);
+            return respond(res, badRequest(propertyValidationResult));
         }
 
-        User.findOne({username: req.body.username})
-            .then(user => {
-                if (user === null) {
-                    return unauthorized(res);
-                }
-
-                // compare pws
-                const isPasswordValid = bcrypt.compareSync(
-                    req.body.password,
-                    user.password
-                );
-
-                if (!isPasswordValid) {
-                    return unauthorized(res, {message: "Invalid password."});
-                }
-
-                // Otherwise, we should sign a token
-                const token = jwt.sign(
-                    {id: user.id},
-                    API_SECRET!,
-                    {expiresIn: 86400}
-                );
-
-                return ok(res, {
-                    username: user.username,
-                    message: "User logged in successfully.",
-                    jwt_token: token
-                });
-            })
-            .catch(() => {
-                // In the interest of security, we do not allow the requester to know if an account exists with this info
-                return unauthorized(res, {message: "Invalid password."});
-            });
+        loginUser(req.body.username, req.body.password)
+            .then(payload => respond(res, payload))
+            .catch(payload => respond(res, payload));
     });
 
 export { router };

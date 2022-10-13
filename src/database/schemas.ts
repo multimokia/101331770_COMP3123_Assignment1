@@ -13,7 +13,7 @@ const EMAIL_PROP = {
     }
 };
 
-interface IUser {
+export interface IUser {
     username: string,
     email: string,
     password: string
@@ -25,7 +25,7 @@ const userSchema = new Schema<IUser>({
     password: {type: String, required: true},
 });
 
-interface IEmployee {
+export interface IEmployee {
     first_name: string,
     last_name: string,
     email: string,

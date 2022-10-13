@@ -1,35 +1,46 @@
-export function ok(res: any, options: object = {message: "Success."}): void {
-    res.status(200).send({...{status: true}, ...options});
+export interface BaseResponse {
+    statusCode: number,
+    status: boolean
+    message?: string,
+    content?: object
 }
 
-export function itemCreated(res: any, options: object = {message: "Created."}): void {
-    res.status(201).send({...{status: true}, ...options});
+export function respond(res: any, body: BaseResponse): void {
+    res.status(body.statusCode).send(body);
 }
 
-export function noContent(res: any, options: object = {message: "No content."}): void {
-    res.status(204).send({...{status: true}, ...options});
+export function ok(additionalFields: object = {}): BaseResponse {
+    return {statusCode: 200, status: true, message: "Success.", ...additionalFields};
 }
 
-export function badRequest(res: any, options: object = {message: "Bad request."}): void {
-    res.status(400).send({...{status: false}, ...options});
+export function itemCreated(additionalFields: object = {}): BaseResponse {
+    return {statusCode: 201, status: true, message: "Created", ...additionalFields};
 }
 
-export function unauthorized(res: any, options: object = {message: "Unauthorized."}): void {
-    res.status(401).send({...{status: false}, ...options});
+export function noContent(additionalFields: object = {}): BaseResponse {
+    return {statusCode: 204, status: true, message: "No content.", ...additionalFields};
 }
 
-export function notFound(res: any, options: object = {message: "Not found."}): void {
-    res.status(404).send({...{status: false}, ...options});
+export function badRequest(additionalFields: object = {}): BaseResponse {
+    return {statusCode: 400, status: false, message: "Bad request.", ...additionalFields};
 }
 
-export function methodNotAllowed(res: any, options: object = {message: "Method not allowed."}): void {
-    res.status(405).send({...{status: false}, ...options});
+export function unauthorized(additionalFields: object = {}): BaseResponse {
+    return {statusCode: 401, status: false, message: "Unauthorized", ...additionalFields};
 }
 
-export function alreadyExists(res: any, options: object = {message: "Item already exists."}): void {
-    res.status(409).send({...{status: false}, ...options});
+export function notFound(additionalFields: object = {}): BaseResponse {
+    return {statusCode: 404, status: false, message: "Not found.", ...additionalFields};
 }
 
-export function internalServerError(res: any, options: object = {message: "Item created."}): void {
-    res.status(500).send({...{status: false}, ...options});
+export function methodNotAllowed(additionalFields: object = {}): BaseResponse {
+    return {statusCode: 405, status: false, message: "Method not allowed.", ...additionalFields};
+}
+
+export function conflict(additionalFields: object = {}): BaseResponse {
+    return {statusCode: 409, status: false, message: "Conflict.", ...additionalFields};
+}
+
+export function internalServerError(additionalFields: object = {}): BaseResponse {
+    return {statusCode: 500, status: false, message: "Internal server error.", ...additionalFields};
 }
