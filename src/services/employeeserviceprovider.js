@@ -12,7 +12,8 @@ export async function getEmployee(id) {
                 // Otherwise send data
                 resolve(ok({content: employee}));
             })
-            .catch(err => reject(internalServerError({message: err})));
+            // For security, we don't let API users get hints from errors
+            .catch(() => reject(notFound()));
     });
 }
 
@@ -43,9 +44,9 @@ export async function createEmployee(employeeData) {
 
                 emp.save()
                     .then(() => resolve(itemCreated({message: "Employee created successfully"})))
-                    .catch((err) => reject(internalServerError({message: err}))) ;
+                    .catch((err) => reject(internalServerError({message: err.message}))) ;
             })
-            .catch((err) => reject(internalServerError({message: err})));
+            .catch((err) => reject(internalServerError({message: err.message})));
     });
 }
 
@@ -70,7 +71,7 @@ export async function updateEmployee(id, employeeData) {
                 }
                 resolve(ok({message: `Employee ${id} updated.`}));
             })
-            .catch(err => reject(internalServerError({message: err})));
+            .catch(err => reject(internalServerError({message: err.message})));
     });
 }
 
@@ -85,6 +86,6 @@ export async function deleteEmployee(id) {
                 // Id existed, and has been deleted
                 resolve(noContent({message: `Employee ${id} has been deleted.`}));
             })
-            .catch(err => reject(internalServerError({message: err})));
+            .catch(err => reject(internalServerError({message: err.message})));
     });
 }

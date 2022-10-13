@@ -41,6 +41,15 @@ router.route("/:id")
             .catch(payload => respond(res, payload));
     })
     .put(json(), (req, res) => {
+        const propValidationResult = validateMissingProperties(
+            req.body,
+            ["first_name", "last_name", "email", "salary"]
+        );
+
+        if (!propValidationResult.status) {
+            return respond(res, badRequest(propValidationResult));
+        }
+
         // NOTE: we explicitly pass an object for update as a means of
         // Ensuring no additional properties get added
         updateEmployee(req.params.id, req.body)

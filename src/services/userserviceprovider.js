@@ -27,7 +27,7 @@ export async function registerUser(userInfo) {
                     })
                     .catch(err => reject(internalServerError({message: err})));
             })
-            .catch(err => reject(internalServerError({message: err})));
+            .catch(err => reject(internalServerError({message: err.message})));
     });
 }
 
