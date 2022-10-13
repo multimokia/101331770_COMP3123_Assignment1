@@ -32,6 +32,11 @@ router.route("/")
         })
             .then(payload => respond(res, payload))
             .catch(payload => respond(res, payload));
+    })
+    .delete((req, res) => {
+        deleteEmployee(req.query.eid)
+            .then(payload => respond(res, payload))
+            .catch(payload => respond(res, payload));
     });
 
 router.route("/:id")
@@ -53,11 +58,6 @@ router.route("/:id")
         // NOTE: we explicitly pass an object for update as a means of
         // Ensuring no additional properties get added
         updateEmployee(req.params.id, req.body)
-            .then(payload => respond(res, payload))
-            .catch(payload => respond(res, payload));
-    })
-    .delete((req, res) => {
-        deleteEmployee(req.params.id)
             .then(payload => respond(res, payload))
             .catch(payload => respond(res, payload));
     });
