@@ -1,4 +1,5 @@
 # COMP 3123 Assignment 1
+- This application supports `.env` files
 
 ## ENV_VARS:
 - `DB_URI` - **REQUIRED**, connection string to a mongodb database. **WILL ERROR IF NOT PROVIDED**
