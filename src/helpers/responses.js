@@ -1,35 +1,39 @@
-export function ok(res, options = { message: "Success." }) {
-    res.status(200).send(Object.assign({ status: true }, options));
+export function respond(res, body) {
+    res.status(body.statusCode).send(body);
 }
 
-export function itemCreated(res, options = { message: "Created." }) {
-    res.status(201).send(Object.assign({ status: true }, options));
+export function ok(additionalFields = {}) {
+    return Object.assign({ statusCode: 200, status: true, message: "Success." }, additionalFields);
 }
 
-export function noContent(res, options = { message: "No content." }) {
-    res.status(204).send(Object.assign({ status: true }, options));
+export function itemCreated(additionalFields = {}) {
+    return Object.assign({ statusCode: 201, status: true, message: "Created" }, additionalFields);
 }
 
-export function badRequest(res, options = { message: "Bad request." }) {
-    res.status(400).send(Object.assign({ status: false }, options));
+export function noContent(additionalFields = {}) {
+    return Object.assign({ statusCode: 204, status: true, message: "No content." }, additionalFields);
 }
 
-export function unauthorized(res, options = { message: "Unauthorized." }) {
-    res.status(401).send(Object.assign({ status: false }, options));
+export function badRequest(additionalFields = {}) {
+    return Object.assign({ statusCode: 400, status: false, message: "Bad request." }, additionalFields);
 }
 
-export function notFound(res, options = { message: "Not found." }) {
-    res.status(404).send(Object.assign({ status: false }, options));
+export function unauthorized(additionalFields = {}) {
+    return Object.assign({ statusCode: 401, status: false, message: "Unauthorized" }, additionalFields);
 }
 
-export function methodNotAllowed(res, options = { message: "Method not allowed." }) {
-    res.status(405).send(Object.assign({ status: false }, options));
+export function notFound(additionalFields = {}) {
+    return Object.assign({ statusCode: 404, status: false, message: "Not found." }, additionalFields);
 }
 
-export function alreadyExists(res, options = { message: "Item already exists." }) {
-    res.status(409).send(Object.assign({ status: false }, options));
+export function methodNotAllowed(additionalFields = {}) {
+    return Object.assign({ statusCode: 405, status: false, message: "Method not allowed." }, additionalFields);
 }
 
-export function internalServerError(res, options = { message: "Item created." }) {
-    res.status(500).send(Object.assign({ status: false }, options));
+export function conflict(additionalFields = {}) {
+    return Object.assign({ statusCode: 409, status: false, message: "Conflict." }, additionalFields);
+}
+
+export function internalServerError(additionalFields = {}) {
+    return Object.assign({ statusCode: 500, status: false, message: "Internal server error." }, additionalFields);
 }
